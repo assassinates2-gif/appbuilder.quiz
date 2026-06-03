@@ -472,24 +472,20 @@
 
     // ================= アプリケーション状態管理 =================
     let currentQuestionIndex = -1;
-    let pool = []; // 出題用の問題インデックスプール
+    let pool = [];
 
-    // LocalStorageから履歴データを取得、なければ初期化
     let logData = JSON.parse(localStorage.getItem('appbuilder_quiz_logs')) || {
         totalAnswers: 0,
         correctAnswers: 0,
-        wrongCountMap: {} // { questionId: count }
+        wrongCountMap: {}
     };
 
-    // 進行状況の保存 (どの問題をクリアしたか保持)
     let clearedQuestionIds = JSON.parse(localStorage.getItem('appbuilder_cleared_ids')) || [];
 
-    // DOM要素
     const homeScreen = document.getElementById('home-screen');
     const quizScreen = document.getElementById('quiz-screen');
     const historyScreen = document.getElementById('history-screen');
 
-    // ================= 初期化処理 =================
     function updateHomeScreenStatus() {
         document.getElementById('total-q-count').textContent = quizData.length;
         const remaining = quizData.length - clearedQuestionIds.length;
@@ -501,7 +497,6 @@
         localStorage.setItem('appbuilder_cleared_ids', JSON.stringify(clearedQuestionIds));
     }
 
-    // ================= 画面遷移ロジック =================
     function showScreen(screen) {
         homeScreen.classList.add('hidden');
         quizScreen.classList.add('hidden');
@@ -509,9 +504,7 @@
         screen.classList.remove('hidden');
     }
 
-    // ================= 出題ロジック =================
     function startQuiz() {
-        // 未回答の問題のインデックスを集計
         pool = [];
         quizData.forEach((q, idx) => {
             if (!clearedQuestionIds.includes(q.id)) {
@@ -519,13 +512,11 @@
             }
         });
 
-        // 全て回答済みの場合はリセットを促す
         if (pool.length === 0) {
             alert("すべての問題を解き終わりました！一度リセットするか、履歴画面をご確認ください。");
             return;
         }
 
-        // ランダムに1問選択
         const randomPoolIndex = Math.floor(Math.random() * pool.length);
         currentQuestionIndex = pool[randomPoolIndex];
 
@@ -534,24 +525,20 @@
     }
 
     function showQuestion(qData) {
-        // 表示クリア
         document.getElementById('result-area').classList.add('hidden');
         document.getElementById('next-btn').classList.add('hidden');
         document.getElementById('submit-btn').classList.remove('hidden');
 
-        // 問題タイトル・進捗
         const solvedCount = clearedQuestionIds.length + 1;
         document.getElementById('quiz-progress').textContent = `進捗: ${solvedCount} / ${quizData.length} 問目 (問題ID: ${qData.id})`;
         document.getElementById('question-text').textContent = qData.question;
 
-        // 複数選択か単一選択かの判定（「○つ選びなさい」または正解が複数ある場合）
         const isMulti = qData.answers.length > 1 || qData.question.includes("選定") || qData.question.includes("選びなさい");
 
-        // 選択肢コンテナの構築
         const container = document.getElementById('options-container');
         container.innerHTML = '';
 
-        qData.options.forEach((option, idx) => {
+        qData.options.forEach((option) => {
             const label = document.createElement('label');
             label.className = 'option-item';
 
@@ -566,7 +553,6 @@
         });
     }
 
-    // ================= 回答判定ロジック =================
     function submitAnswer() {
         const qData = quizData[currentQuestionIndex];
         const selectedInputs = document.querySelectorAll('input[name="quiz-option"]:checked');
@@ -578,25 +564,20 @@
 
         const selectedValues = Array.from(selectedInputs).map(input => input.value);
         
-        // 正誤判定 (選んだものと正解リストが一致するか)
         const isCorrect = qData.answers.length === selectedValues.length && 
                           qData.answers.every(ans => selectedValues.includes(ans));
 
-        // 統計ログ更新
         logData.totalAnswers++;
         if (isCorrect) {
             logData.correctAnswers++;
-            // 一度正解した問題は既出プール(クリア済み)へ追加
             if (!clearedQuestionIds.includes(qData.id)) {
                 clearedQuestionIds.push(qData.id);
             }
         } else {
-            // 間違えた回数を加算
             logData.wrongCountMap[qData.id] = (logData.wrongCountMap[qData.id] || 0) + 1;
         }
         saveToLocalStorage();
 
-        // 画面にフィードバック
         const resultMessage = document.getElementById('result-message');
         if (isCorrect) {
             resultMessage.textContent = "★ 正解です！";
@@ -610,30 +591,24 @@
         document.getElementById('explanation-text').textContent = qData.explanation;
         document.getElementById('result-area').classList.remove('hidden');
         
-        // ボタン切り替え
         document.getElementById('submit-btn').classList.add('hidden');
         document.getElementById('next-btn').classList.remove('hidden');
     }
 
-    // ================= 履歴集計画面 =================
     function showHistory() {
-        // 正答率計算
         const rate = logData.totalAnswers > 0 ? Math.round((logData.correctAnswers / logData.totalAnswers) * 100) : 0;
         document.getElementById('accuracy-rate').textContent = `${rate}%`;
         document.getElementById('total-answers').textContent = `${logData.totalAnswers}回`;
 
-        // よく間違える問題の集計
         const wrongListContainer = document.getElementById('wrong-questions-list');
         wrongListContainer.innerHTML = '';
 
-        // オブジェクトを配列に変換してソート
         const sortedWrong = [];
         for (let id in logData.wrongCountMap) {
             sortedWrong.push({ id: parseInt(id), count: logData.wrongCountMap[id] });
         }
         sortedWrong.sort((a, b) => b.count - a.count);
 
-        // 上位5つを切り出し
         const topWrong = sortedWrong.slice(0, 5);
 
         if (topWrong.length === 0) {
@@ -653,7 +628,6 @@
         showScreen(historyScreen);
     }
 
-    // ================= データリセット =================
     function resetData() {
         if (confirm("これまでの回答データ、学習進捗、間違えた問題の履歴をすべて消去します。よろしいですか？")) {
             logData = { totalAnswers: 0, correctAnswers: 0, wrongCountMap: {} };
@@ -664,7 +638,6 @@
         }
     }
 
-    // ================= イベントリスナー =================
     document.getElementById('start-btn').addEventListener('click', startQuiz);
     document.getElementById('history-btn').addEventListener('click', showHistory);
     document.getElementById('reset-btn').addEventListener('click', resetData);
@@ -680,7 +653,6 @@
         showScreen(homeScreen);
     });
 
-    // 初回起動
     updateHomeScreenStatus();
 
 </script>
