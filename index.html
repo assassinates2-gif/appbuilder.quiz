@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce AppBuilder 対策問題集</title>
+    <style>
+        :root {
+            --slds-color-brand: #0176d3;
+            --slds-color-brand-hover: #014486;
+            --slds-color-background: #f3f3f3;
+            --slds-color-card-bg: #ffffff;
+            --slds-color-text: #181818;
+            --slds-color-border: #c9c9c9;
+            --slds-color-success: #2e7d32;
+            --slds-color-error: #ea001e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--slds-color-background);
+            color: var(--slds-color-text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--slds-color-card-bg);
+            border: 1px solid var(--slds-color-border);
+            border-radius: 4px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--slds-color-brand);
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--slds-color-brand);
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--slds-color-brand);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            transition: background-color 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--slds-color-brand-hover);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-danger {
+            background-color: var(--slds-color-error);
+        }
+        .btn-danger:hover {
+            background-color: #b30014;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ホーム画面用スタイル */
+        .status-info {
+            background-color: #eef4ff;
+            border-left: 4px solid var(--slds-color-brand);
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* 問題画面用スタイル */
+        .option-item {
+            display: block;
+            padding: 12px;
+            border: 1px solid var(--slds-color-border);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .option-item input {
+            margin-right: 10px;
+            transform: scale(1.1);
+        }
+
+        /* 結果表示 */
+        .result-box {
+            padding: 16px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .result-success {
+            background-color: #e8f5e9;
+            color: var(--slds-color-success);
+            border: 1px solid #c8e6c9;
+        }
+
+        .result-error {
+            background-color: #ffebee;
+            color: var(--slds-color-error);
+            border: 1px solid #ffcdd2;
+        }
+
+        .explanation-box {
+            background-color: #fafafa;
+            border: 1px solid var(--slds-color-border);
+            border-radius: 4px;
+            padding: 16px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-size: 15px;
+        }
+
+        /* 履歴画面用スタイル */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background-color: #f8f9fa;
+            border: 1px solid var(--slds-color-border);
+            border-radius: 4px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--slds-color-brand);
+        }
+
+        .wrong-list-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--slds-color-border);
+        }
+        .wrong-list-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1>Salesforce AppBuilder 対策問題集</h1>
+
+        <div id="home-screen">
+            <div class="status-info">
+                <p>現在のステータス</p>
+                <p><strong>全問題数:</strong> <span id="total-q-count">0</span> 問</p>
+                <p><strong>未回答の問題:</strong> <span id="remaining-q-count">0</span> 問</p>
+            </div>
+            <div style="margin-top: 20px;">
+                <button class="btn" id="start-btn">問題を開始する</button>
+                <button class="btn btn-secondary" id="history-btn">履歴を見る</button>
+                <button class="btn btn-danger" id="reset-btn">データをリセット</button>
+            </div>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <span id="quiz-progress" style="font-weight: bold; color: #555;">問題番号: --</span>
+                <button class="btn btn-secondary" id="back-home-btn" style="padding: 6px 12px; font-size: 14px;">ホームに戻る</button>
+            </div>
+
+            <div id="question-text" style="font-size: 16px; font-weight: bold; margin-bottom: 20px; white-space: pre-wrap;">
+                </div>
+
+            <div id="options-container">
+                </div>
+
+            <div style="margin-top: 20px;">
+                <button class="btn" id="submit-btn">回答する</button>
+                <button class="btn btn-secondary hidden" id="next-btn">次へ進む</button>
+            </div>
+
+            <div id="result-area" class="hidden">
+                <div id="result-message" class="result-box"></div>
+                <div id="explanation-text" class="explanation-box"></div>
+            </div>
+        </div>
+
+        <div id="history-screen" class="hidden">
+            <h2>回答履歴・統計</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <p>全体の正答率</p>
+                    <div class="stat-number" id="accuracy-rate">0%</div>
+                </div>
+                <div class="stat-card">
+                    <p>総回答数（のべ）</p>
+                    <div class="stat-number" id="total-answers">0回</div>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 10px; font-size: 16px;">よく間違える問題（トップ5）</h3>
+            <div id="wrong-questions-list" style="border: 1px solid var(--slds-color-border); border-radius: 4px; background: #fff;">
+                </div>
+
+            <div style="margin-top: 20px;">
+                <button class="btn btn-secondary" id="history-back-btn">ホームに戻る</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // ================= 20問のマスターデータ =================
+    const quizData = [
+        {
+            id: 1,
+            question: "スキーマビルダーの機能はどれですか。2つ選びなさい。",
+            options: [
+                "ページレイアウトを新しいウィンドウで表示する",
+                "カスタム設定を編集する",
+                "選択したオブジェクトをページに表示する",
+                "新しいレコードタイプを作成する"
+            ],
+            answers: ["ページレイアウトを新しいウィンドウで表示する", "選択したオブジェクトをページに表示する"],
+            explanation: "【解説】\n□ ページレイアウトを新しいウィンドウで表示する\nこれは正解です。任意のオブジェクトにある設定ボタンを押下後、[ページレイアウトを表示]のオプションを選択することで、関連するページレイアウトを新しいウィンドウで表示することができます。\n\n□ カスタム設定を編集する\nこれは不正解です。スキーマビルダーは主にオブジェクト、項目、関係の視覚的表現と編集のために使用されます。\n\n□ 選択したオブジェクトをページに表示する\nこれは正解です。組織のデータモデルの中から選択したオブジェクトやその関係を視覚的に表示できます。\n\n□ 新しいレコードタイプを作成する\nこれは不正解です。レコードタイプの作成はオブジェクト管理設定から行います。"
+        },
+        {
+            id: 2,
+            question: "カスタムレポートタイプを作成する際に、アプリケーションビルダーが考慮することはどれですか。",
+            options: [
+                "主従関係の従オブジェクトは、カスタムレポートタイプのセカンダリオブジェクトとして追加できません。",
+                "オブジェクトがセキュリティ設定によってレポートタイプを作成する担当者に表示されない場合を除き、任意のオブジェクトを選択できます。",
+                "主オブジェクトがカスタムオブジェクトで削除された場合、レポートタイプとそこから作成されたレポートは手動で削除する必要があります。",
+                "レポートタイプが標準またはカスタムの主オブジェクトで保存されると、そのレポートタイプで主オブジェクトを変更することはできません。"
+            ],
+            answers: ["レポートタイプが標準またはカスタムの主オブジェクトで保存されると、そのレポートタイプで主オブジェクトを変更することはできません。"],
+            explanation: "【解説】\n一度カスタムレポートタイプが保存されると、主オブジェクトを変更することはできません。そのため、初期設計時には主オブジェクトの選択を慎重に行う必要があります。"
+        },
+        {
+            id: 3,
+            question: "Universal Containers社は、今後30日以内にどれだけの商談が終了するかを追跡するために、取引先に項目が必要です。何を使用すればよいでしょうか。",
+            options: ["ワークフロールール", "積み上げ集計項目", "プロセスビルダー", "Apexコード"],
+            answers: ["Apexコード"],
+            explanation: "【解説】\n相対日付(今後30日以内など)を条件とした複数子レコードの集計は標準の積み上げ集計項目やプロセスビルダーでは直接実現できないため、Apexコード（またはフロー）によるカスタムロジックの実装が必要となります。"
+        },
+        {
+            id: 4,
+            question: "現在、本本環境にインストールされている未管理パッケージをアップグレードするには、どのような手順を実行すればよいですか。",
+            options: [
+                "現在のバージョンをアンインストールし、新しいバージョンをインストールする。",
+                "インストールウィザードを使用して、本番環境にアップグレードをインストールする。",
+                "新しいバージョンを開発者組織にインストールし、本番環境にデプロイする。",
+                "[インストール済みパッケージ]ページの[更新]リンクをクリックする。"
+            ],
+            answers: ["現在のバージョンをアンインストールし、新しいバージョンをインストールする。"],
+            explanation: "【解説】\n未管理パッケージにはアップグレードの仕組みがないため、新しいバージョンを適用するには一度既存のパッケージをアンインストールし、再インストールする必要があります。"
+        },
+        {
+            id: 5,
+            question: "Universal Containers社は、取引先の詳細ページに、関連するすべての商談をフェーズごとのグラフで表示したいと考えています。この要件を満たすために、アプリケーションビルダーが取引先ページレイアウトに追加するべきレポートの種類はどれですか。",
+            options: [
+                "取引先オブジェクトに基づくサマリーレポート",
+                "取引先オブジェクトに基づく表形式レポート",
+                "商談オブジェクトに基づくサマリーレポート",
+                "商談オブジェクトに基づく表形式レポート"
+            ],
+            answers: ["商談オブジェクトに基づくサマリーレポート"],
+            explanation: "【解説】\n商談をフェーズごとにグラフ化するため「商談オブジェクト」が対象となります。また、ページレイアウトにレポートグラフを追加するには、ソースレポートが「サマリー」または「マトリックス」形式である必要があります。"
+        },
+        {
+            id: 6,
+            question: "アプリケーションビルダーは、取引先責任者レコードで取引先責任者の「優先連絡方法」を直接特定する方法をユーザーに提供する必要があります。またユーザーは、[電話番号]と[メール]のどちらかを取引先責任者の優先通信方法として選択する必要があります。アプリケーションビルダーが要件を実現するために利用するデータ型はどれですか。",
+            options: ["数式", "メール", "選択リスト", "チェックボックス"],
+            answers: ["選択リスト"],
+            explanation: "【解説】\nユーザーが定義された複数の選択肢（電話番号、メール）の中から1つを選ぶ要件には「選択リスト」データ型が最適です。"
+        },
+        {
+            id: 7,
+            question: "Visualforceページをページレイアウトに埋め込む場合に当てはまる記述はどれですか。2つ選びなさい。",
+            options: [
+                "ページレイアウトのVisualforceページには幅と高さの属性があります。",
+                "項目セットのVisualforceページには、幅と高さの属性があります。",
+                "Visualforceページは、ページレイアウトのどこにでも配置できます。",
+                "Visualforceページは、ページレイアウトのVisualforceセクションにのみ配置できます。"
+            ],
+            answers: [
+                "ページレイアウトのVisualforceページには幅と高さの属性があります。",
+                "Visualforceページは、ページレイアウトのどこにでも配置できます。"
+            ],
+            explanation: "【解説】\nページレイアウトに埋め込んだVisualforceページには、サイズ（幅・高さ）を指定する属性があります。また、詳細セクションなどレイアウト内のカスタマイズ可能な任意の場所に配置できます。"
+        },
+        {
+            id: 8,
+            question: "DreamHouse Realty社(DR)は、取引先責任者の[発信禁止(DoNotCall)]チェックボックスがオンになった場合、電話番号が削除されるようにするポリシーを定めています。アプリケーションビルダーはどの自動化ツールを推奨すべきですか。",
+            options: ["承認プロセス", "入力規則", "ワークフロールール", "クイックアクション"],
+            answers: ["ワークフロールール"],
+            explanation: "【解説】\n特定の条件（チェックボックスがオン）を満たした際に、別の項目を自動でクリア（空に更新）する処理には、項目の自動更新アクションを持つ「ワークフロールール（またはフロー）」が適しています。"
+        },
+        {
+            id: 9,
+            question: "Cloud Kicks社では、各出荷に対して出荷日が記録されています。配車担当者は、出荷が行われた日時のより詳細な情報、つまり日付と時刻を必要としています。アプリケーションビルダーは、現在使用されている日付型項目を日付/時刻型項目に変更しようとしています。このとき、既存のシステム内のデータに関して注意すべき点はどれですか。",
+            options: [
+                "変更は即時に反映される。",
+                "既存データはすべて時刻12:00に更新される。",
+                "項目名が変更される。",
+                "データが失われる可能性がある。"
+            ],
+            answers: ["データが失われる可能性がある。"],
+            explanation: "【解説】\n日付型から日付/時刻型など、互換性のないデータ型への変更を行う場合、既存のデータが失われるリスク（データ損失の可能性）があるため、事前のバックアップが強く推奨されます。"
+        },
+        {
+            id: 10,
+            question: "AW Computing社の採用チームは、ジョブ応募のカスタムオブジェクトで、候補者の内定承諾(Job_Accepted__c)と採用日(Hire_Date__c)を記録しています。候補者が内定を承諾した後、採用日を入力することはできますが、一度入力された後は編集できないようにする必要があります。この要件を満たすために、アプリケーションビルダーはどの入力規則を使用すべきですか。",
+            options: [
+                "(ISBLANK(Job_Accepted__c) || NOT(ISCHANGED(Hire_Date__c))",
+                "(ISBLANK(Job_Accepted__c) && NOT(ISCHANGED(Hire_Date__c))",
+                "NOT(ISBLANK(Job_Accepted__c)) && ISCHANGED(Hire_Date__c)",
+                "NOT(ISBLANK(Job_Accepted__c)) || ISCHANGED(Hire_Date__c)"
+            ],
+            answers: ["NOT(ISBLANK(Job_Accepted__c)) && ISCHANGED(Hire_Date__c)"],
+            explanation: "【解説】\n「内定が承諾されている（空白ではない）」かつ「採用日項目が変更された（ISCHANGED）」という2つの条件を両方満たした時（&&）にエラーを発生させることで、その後の編集をブロックできます。"
+        },
+        {
+            id: 11,
+            question: "次のシナリオについて、項目更新の影響と再帰の可能性を説明しなさい： ルール1の項目更新がルール2をトリガーし、ルール2の項目更新がルール1をトリガーする場合",
+            options: [
+                "更新によりループが発生し、1時間あたりのワークフロータイムトリガーの制限に違反する可能性が高い。",
+                "2つ目のトリガーが保存されると、Imminent Loop Errorメッセージが表示され、ワークフロールールの更新は保存されない。",
+                "更新はループを作成し、管理者が問題を解決するまで、組織はブロックされる。",
+                "ループは1時間以内に25回実行できる。ループが終了しない場合、R&Dによってプロセスが停止される。"
+            ],
+            answers: ["更新によりループが発生し、1時間あたりのワークフロータイムトリガーの制限に違反する可能性が高い。"],
+            explanation: "【解説】\nワークフロールールが相互に項目更新をトリガーし合うと無限ループ（再帰）が発生し、Salesforceのガバナ制限（1時間あたりのワークフロータイムトリガー数など）に達してエラーを引き起こします。"
+        },
+        {
+            id: 12,
+            question: "Cloud Kicks社では、新規商談の承認プロセスを設定し、最初の送信に基づいてさまざまなアクションを実行したいと考えています。承認プロセスでアプリケーションビルダーが使用できるアクションの種別はどれですか。3つ選びなさい。",
+            options: ["フローの開始", "ToDo", "プロセスビルダーの開始", "送信メッセージ", "メールアラート"],
+            answers: ["ToDo", "送信メッセージ", "メールアラート"],
+            explanation: "【解説】\n承認プロセスの自動化アクションとしてサポートされているのは「ToDoの作成」「メールアラートの送信」「項目自動更新」「送信メッセージ（アウトバウンドメッセージ）」の4つです。"
+        },
+        {
+            id: 13,
+            question: "Universal Containers社のアプリケーションビルダーは、フェーズがClosed Wonに設定されているときに、金額項目が確実に入力されるように要求されました。この要件を満たすには何を使用できますか。",
+            options: ["ワークフロールール", "プロセスビルダー", "承認プロセス", "入力規則"],
+            answers: ["入力規則"],
+            explanation: "【解説】\n特定の条件下（フェーズ＝Closed Won）でデータの入力をユーザーに強制し、満たさない場合に保存を拒否するのは「入力規則」の本来の役割です。"
+        },
+        {
+            id: 14,
+            question: "商談オブジェクトに設定できるルールはどれですか。2つ選びなさい。",
+            options: ["エスカレーションルール", "入力規則", "割り当てルール", "ワークフロールール"],
+            answers: ["入力規則", "ワークフロールール"],
+            explanation: "【解説】\n商談オブジェクトに設定できるのは「入力規則」や「ワークフロールール（フロー）」などです。「エスカレーションルール」や「割り当てルール」はリードやケースに適用される標準機能です。"
+        },
+        {
+            id: 15,
+            question: "Cloud Kicks社のCFOは、30%以上の割引が適用された大口の店舗販売契約については、契約を成立させる前に承認する必要があります。この要件に対応するために使用すべき機能はどれですか。",
+            options: ["承認プロセス", "メールアラート", "項目自動更新アクション", "ワークフロールール"],
+            answers: ["承認プロセス"],
+            explanation: "【解説】\n「上司や役員の承認を得てから次のステップに進む」という商談や契約のワークフローを実装するには「承認プロセス」機能を使用します。"
+        },
+        {
+            id: 16,
+            question: "Northern Trail Outfitters社は、主従関係にある2つのカスタムオブジェクトを使用しています。従レコードの所有者および共有アクセスを決定する要因は何ですか。",
+            options: [
+                "主オブジェクトの設定で、デフォルトの所有者が設定される。",
+                "従レコードの[所有者]項目",
+                "主レコードの[所有者]項目",
+                "従オブジェクトの設定で、独立して所有者が設定される。"
+            ],
+            answers: ["主レコードの[所有者]項目"],
+            explanation: "【解説】\n主従関係において、従レコード（子）は独自の所有者を持たず、常に「主レコード（親）の所有者」の設定および共有ルールをそのまま継承します。"
+        },
+        {
+            id: 17,
+            question: "Assignmentという名前のカスタムオブジェクトには、階層を使用してアクセス権を付与する非公開の共有設定があります。組織にはロール階層があり、スペシャリストロールはマネージャーロールに報告し、マネージャーロールはディレクターロールに報告します。ディレクターロールは、ロール階層の最上位にあります。マネージャーロールのユーザーが、新しいAssignmentレコードを作成した場合、誰がこのレコードを参照できますか。",
+            options: [
+                "レコード所有者とその階層のディレクター",
+                "レコード所有者とその階層のスペシャリストロールより上位の人",
+                "レコード所有者とその階層のマネージャー",
+                "レコード所有者とその階層のスペシャリスト"
+            ],
+            answers: ["レコード所有者とその階層のディレクター"],
+            explanation: "【解説】\nロール階層によるアクセス権付与が有効な場合、レコード所有者（マネージャー）よりも上位のロール（ディレクター）のユーザーに対し、自動的に参照・編集権限が付与されます。下位（スペシャリスト）や同階層の他ユーザーには付与されません。"
+        },
+        {
+            id: 18,
+            question: "Northern Trail Outfitters社は、取引先とカスタムオブジェクトParkの主従関係を、参照関係に変更しようとしています。しかし、アプリケーションビルダーはこの変更を行うことができません。この原因として考えられるものはどれですか。",
+            options: [
+                "取引先がParkオブジェクトのフロープロセスに含まれている。",
+                "Parkオブジェクトには、レポート用に少なくとも1つの主従関係が必要である。",
+                "取引先のレコードに、Parkの積み上げ集計項目が含まれている。",
+                "Parkレコードに、取引先に基づく数式項目が含まれている。"
+            ],
+            answers: ["取引先のレコードに、Parkの積み上げ集計項目が含まれている。"],
+            explanation: "【解説】\n主従関係を参照関係に変更する際の最大の障壁は、主オブジェクト側に存在する「積み上げ集計項目」です。これらが残っていると関係を変更できないため、事前に削除する必要があります。"
+        },
+        {
+            id: 19,
+            question: "アプリケーションビルダーが新しいレポートタイプを作成しましたが、ユーザーが新規レポート作成時に[レポートタイプ]一覧から選択できません。この問題の原因として考えられるのはどれですか。2つ選びなさい。",
+            options: [
+                "レポートタイプのステータスが[開発中]になっている。",
+                "必要なオブジェクトへのアクセス権がない。",
+                "レポートタイプのステータスが[リリース済み]になっている。",
+                "[レポートの作成とカスタマイズ]の権限が無効になっている。"
+            ],
+            answers: ["レポートタイプのステータスが[開発中]になっている。", "必要なオブジェクトへのアクセス権がない。"],
+            explanation: "【解説】\nレポートタイプが「開発中」の時は管理者しか使用できません。また、レポートタイプに含まれるオブジェクト自体の参照権限がユーザーのプロファイル等にない場合も、一覧に表示されません。"
+        },
+        {
+            id: 20,
+            question: "未管理パッケージを使用する際の主な考慮事項はどれですか。2つ選びなさい。",
+            options: [
+                "未管理パッケージを作成した人が、インストールされているコンポーネントを変更またはアップグレードできます。",
+                "未管理パッケージを作成するためには、名前空間が必要です。",
+                "未管理パッケージを作成するためには、名前空間は必要ありません。",
+                "未管理パッケージを作成した人は、インストールされたコンポーネントを制御できません。"
+            ],
+            answers: [
+                "未管理パッケージを作成するためには、名前空間は必要ありません。",
+                "未管理パッケージを作成した人は、インストールされたコンポーネントを制御できません。"
+            ],
+            explanation: "【解説】\n未管理パッケージの作成に名前空間（Namespace）の定義は不要です。また、一度インストールされた後は、配布元からリモートで変更・アップグレードを制御することは一切できません（ソースコードの単なるコピーとして扱われます）。"
+        }
+    ];
+
+    // ================= アプリケーション状態管理 =================
+    let currentQuestionIndex = -1;
+    let pool = [];
+
+    let logData = JSON.parse(localStorage.getItem('appbuilder_quiz_logs')) || {
+        totalAnswers: 0,
+        correctAnswers: 0,
+        wrongCountMap: {}
+    };
+
+    let clearedQuestionIds = JSON.parse(localStorage.getItem('appbuilder_cleared_ids')) || [];
+
+    const homeScreen = document.getElementById('home-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const historyScreen = document.getElementById('history-screen');
+
+    function updateHomeScreenStatus() {
+        document.getElementById('total-q-count').textContent = quizData.length;
+        const remaining = quizData.length - clearedQuestionIds.length;
+        document.getElementById('remaining-q-count').textContent = remaining;
+    }
+
+    function saveToLocalStorage() {
+        localStorage.setItem('appbuilder_quiz_logs', JSON.stringify(logData));
+        localStorage.setItem('appbuilder_cleared_ids', JSON.stringify(clearedQuestionIds));
+    }
+
+    function showScreen(screen) {
+        homeScreen.classList.add('hidden');
+        quizScreen.classList.add('hidden');
+        historyScreen.classList.add('hidden');
+        screen.classList.remove('hidden');
+    }
+
+    function startQuiz() {
+        pool = [];
+        quizData.forEach((q, idx) => {
+            if (!clearedQuestionIds.includes(q.id)) {
+                pool.push(idx);
+            }
+        });
+
+        if (pool.length === 0) {
+            alert("すべての問題を解き終わりました！一度リセットするか、履歴画面をご確認ください。");
+            return;
+        }
+
+        const randomPoolIndex = Math.floor(Math.random() * pool.length);
+        currentQuestionIndex = pool[randomPoolIndex];
+
+        showQuestion(quizData[currentQuestionIndex]);
+        showScreen(quizScreen);
+    }
+
+    function showQuestion(qData) {
+        document.getElementById('result-area').classList.add('hidden');
+        document.getElementById('next-btn').classList.add('hidden');
+        document.getElementById('submit-btn').classList.remove('hidden');
+
+        const solvedCount = clearedQuestionIds.length + 1;
+        document.getElementById('quiz-progress').textContent = `進捗: ${solvedCount} / ${quizData.length} 問目 (問題ID: ${qData.id})`;
+        document.getElementById('question-text').textContent = qData.question;
+
+        const isMulti = qData.answers.length > 1 || qData.question.includes("選定") || qData.question.includes("選びなさい");
+
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+
+        qData.options.forEach((option) => {
+            const label = document.createElement('label');
+            label.className = 'option-item';
+
+            const input = document.createElement('input');
+            input.type = isMulti ? 'checkbox' : 'radio';
+            input.name = 'quiz-option';
+            input.value = option;
+
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(option));
+            container.appendChild(label);
+        });
+    }
+
+    function submitAnswer() {
+        const qData = quizData[currentQuestionIndex];
+        const selectedInputs = document.querySelectorAll('input[name="quiz-option"]:checked');
+        
+        if (selectedInputs.length === 0) {
+            alert("選択肢を1つ以上選んでください。");
+            return;
+        }
+
+        const selectedValues = Array.from(selectedInputs).map(input => input.value);
+        
+        const isCorrect = qData.answers.length === selectedValues.length && 
+                          qData.answers.every(ans => selectedValues.includes(ans));
+
+        logData.totalAnswers++;
+        if (isCorrect) {
+            logData.correctAnswers++;
+            if (!clearedQuestionIds.includes(qData.id)) {
+                clearedQuestionIds.push(qData.id);
+            }
+        } else {
+            logData.wrongCountMap[qData.id] = (logData.wrongCountMap[qData.id] || 0) + 1;
+        }
+        saveToLocalStorage();
+
+        const resultMessage = document.getElementById('result-message');
+        if (isCorrect) {
+            resultMessage.textContent = "★ 正解です！";
+            resultMessage.className = "result-box result-success";
+        } else {
+            const correctStr = qData.answers.join(' / ');
+            resultMessage.textContent = `✕ 不正解... (正解: ${correctStr})`;
+            resultMessage.className = "result-box result-error";
+        }
+
+        document.getElementById('explanation-text').textContent = qData.explanation;
+        document.getElementById('result-area').classList.remove('hidden');
+        
+        document.getElementById('submit-btn').classList.add('hidden');
+        document.getElementById('next-btn').classList.remove('hidden');
+    }
+
+    function showHistory() {
+        const rate = logData.totalAnswers > 0 ? Math.round((logData.correctAnswers / logData.totalAnswers) * 100) : 0;
+        document.getElementById('accuracy-rate').textContent = `${rate}%`;
+        document.getElementById('total-answers').textContent = `${logData.totalAnswers}回`;
+
+        const wrongListContainer = document.getElementById('wrong-questions-list');
+        wrongListContainer.innerHTML = '';
+
+        const sortedWrong = [];
+        for (let id in logData.wrongCountMap) {
+            sortedWrong.push({ id: parseInt(id), count: logData.wrongCountMap[id] });
+        }
+        sortedWrong.sort((a, b) => b.count - a.count);
+
+        const topWrong = sortedWrong.slice(0, 5);
+
+        if (topWrong.length === 0) {
+            wrongListContainer.innerHTML = '<p style="padding: 15px; color: #666; text-align: center;">まだ間違えた履歴はありません。</p>';
+        } else {
+            topWrong.forEach(item => {
+                const qObj = quizData.find(q => q.id === item.id);
+                if (qObj) {
+                    const div = document.createElement('div');
+                    div.className = 'wrong-list-item';
+                    div.innerHTML = `<strong>問題ID ${qObj.id} (誤答回数: <span style="color:red;">${item.count}回</span>)</strong><br><small>${qObj.question.substring(0, 60)}...</small>`;
+                    wrongListContainer.appendChild(div);
+                }
+            });
+        }
+
+        showScreen(historyScreen);
+    }
+
+    function resetData() {
+        if (confirm("これまでの回答データ、学習進捗、間違えた問題の履歴をすべて消去します。よろしいですか？")) {
+            logData = { totalAnswers: 0, correctAnswers: 0, wrongCountMap: {} };
+            clearedQuestionIds = [];
+            saveToLocalStorage();
+            updateHomeScreenStatus();
+            alert("データを初期化しました。");
+        }
+    }
+
+    document.getElementById('start-btn').addEventListener('click', startQuiz);
+    document.getElementById('history-btn').addEventListener('click', showHistory);
+    document.getElementById('reset-btn').addEventListener('click', resetData);
+    document.getElementById('submit-btn').addEventListener('click', submitAnswer);
+    document.getElementById('next-btn').addEventListener('click', startQuiz);
+    
+    document.getElementById('back-home-btn').addEventListener('click', () => {
+        updateHomeScreenStatus();
+        showScreen(homeScreen);
+    });
+    document.getElementById('history-back-btn').addEventListener('click', () => {
+        updateHomeScreenStatus();
+        showScreen(homeScreen);
+    });
+
+    updateHomeScreenStatus();
+
+</script>
+</body>
+</html>
